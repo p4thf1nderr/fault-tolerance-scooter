@@ -163,11 +163,11 @@ func (a *App) initAdminServer(ctx context.Context) error {
 	a.adminMux.HandleFunc(healthcheck.StartupPath, a.healthCheck.StartupEndpoint)
 
 	a.adminMux.Post("/cordon", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&a.cordoned, 1)
+		atomic.StoreInt32(&a.cordoned, 1)
 	}))
 
 	a.adminMux.Post("/uncordon", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&a.cordoned, 0)
+		atomic.StoreInt32(&a.cordoned, 0)
 	}))
 
 	return nil
