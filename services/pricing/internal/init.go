@@ -163,11 +163,11 @@ func (a *App) initAdminServer(ctx context.Context) error {
 	a.adminMux.HandleFunc(healthcheck.StartupPath, a.healthCheck.StartupEndpoint)
 
 	a.adminMux.HandleFunc("/cordon", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&a.isReady, 0)
+		atomic.AddInt32(&a.isCordoned, 1)
 	}))
 
 	a.adminMux.HandleFunc("/uncordon", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&a.isReady, 1)
+		atomic.AddInt32(&a.isCordoned, 0)
 	}))
 
 	return nil
@@ -226,6 +226,14 @@ func (a *App) initHealthCheck(_ context.Context) error {
 		}
 
 		return fmt.Errorf("Приложение ещё не готово принимать трафик")
+	})
+
+	a.healthCheck.AddReadinessCheck("started", func() error {
+		if atomic.LoadInt32(&a.isCordoned) != 1 {
+			return nil
+		}
+
+		return fmt.Errorf("Приложение выведено из под трафика")
 	})
 
 	a.healthCheck.AddReadinessCheck("termination", func() error {
