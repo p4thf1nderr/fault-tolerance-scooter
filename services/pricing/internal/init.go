@@ -163,11 +163,11 @@ func (a *App) initAdminServer(ctx context.Context) error {
 	a.adminMux.HandleFunc(healthcheck.StartupPath, a.healthCheck.StartupEndpoint)
 
 	a.adminMux.HandleFunc("/cordon", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&a.isCordoned, 1)
+		atomic.AddInt32(&a.cordoned, 1)
 	}))
 
 	a.adminMux.HandleFunc("/uncordon", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&a.isCordoned, 0)
+		atomic.AddInt32(&a.cordoned, 0)
 	}))
 
 	return nil
@@ -229,7 +229,7 @@ func (a *App) initHealthCheck(_ context.Context) error {
 	})
 
 	a.healthCheck.AddReadinessCheck("started", func() error {
-		if atomic.LoadInt32(&a.isCordoned) == 0 {
+		if atomic.LoadInt32(&a.cordoned) == 0 {
 			return nil
 		}
 
