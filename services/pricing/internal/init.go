@@ -229,7 +229,7 @@ func (a *App) initHealthCheck(_ context.Context) error {
 	})
 
 	a.healthCheck.AddReadinessCheck("started", func() error {
-		if atomic.LoadInt32(&a.isCordoned) != 1 {
+		if atomic.LoadInt32(&a.isCordoned) == 0 {
 			return nil
 		}
 
