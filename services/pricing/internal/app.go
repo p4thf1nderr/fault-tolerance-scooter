@@ -51,7 +51,9 @@ type App struct {
 	grpcConn map[string]grpc.ClientConnInterface
 
 	started    int32
+	isReady    int32
 	terminated int32
+	cordoned   int32
 
 	// обработчик health check probe
 	healthCheck healthcheck.Handler
@@ -87,6 +89,7 @@ func New(ctx context.Context) *App {
 			slog.Error("Не удалось загрузить тарифы", "error", err)
 			return
 		}
+		atomic.StoreInt32(&app.isReady, 1)
 		slog.Info("Тарифы загружены")
 	}()
 	return app
